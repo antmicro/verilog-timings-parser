@@ -6,9 +6,9 @@ from collections import defaultdict
 
 from .yacc import Parser
 
-class SpecifyParserError(object):
+class SpecifyParserError(Exception):
     def __init__(self, lineno, line):
-        self.message = 'Error at line {}: {}'.format(lineno, line)
+        self.message = 'Error at line {}: {}'.format(lineno, line + 1)
 
     def __str__(self):
         if self.message:
@@ -47,6 +47,9 @@ class VerilogSpecifyExtractor(object):
         specifyblocks = defaultdict(list)
         isspecify = 0
         modulename = None
+        # XXX: assumption here that the crucial information of ifdef is stored in else part
+        # XXX: except for SC_USE_PG_PIN
+        ifdef = False
         remodule = re.compile(r'^\s*module\s*(?P<name>[a-zA-Z_][a-zA-Z0-9_\$]+)')
         respecify = re.compile(r'^\s*specify')
         reendspecify = re.compile(r'^\s*endspecify')
@@ -69,8 +72,17 @@ class VerilogSpecifyExtractor(object):
                     raise SpecifyParserError(num, line)
                 isspecify = 2
                 specifyblocks[modulename].append(line)
+            elif '`ifdef' in line:
+                if not 'SC_USE_PG_PIN' in line:
+                    ifdef = True
+            elif '`ifndef' in line:
+                pass
+            elif '`else' in line:
+                ifdef = False
+            elif '`endif' in line:
+                ifdef = False
             else:
-                if isspecify == 1:
+                if isspecify == 1 and not ifdef:
                     specifyblocks[modulename].append(line)
         self.specifyblocks = specifyblocks
 
@@ -90,9 +102,10 @@ class VerilogSpecifyExtractor(object):
                 }
             except Exception as ex:
                 print('---------------')
-                print(module)
+                print('Module: {}'.format(module))
                 print('---------------')
-                print('\n'.join(specifyblock))
+                for i, line in enumerate(specifyblock):
+                    print('{:06d}: {}'.format(i+1, line))
                 print('---------------')
                 print(ex)
                 print('---------------')
@@ -106,73 +119,3 @@ class VerilogSpecifyExtractor(object):
 
     def convert_timings_to_lib_json(self):
         pass
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-            "input",
-            help="JSON file containing mappings from cell to Verilog files",
-            type=Path)
-    parser.add_argument(
-            "outputdir",
-            help="The output directory that will contain extracted timings",
-            type=Path)
-
-    args = parser.parse_args()
-
-    with open(args.input, 'r') as verilog:
-        veriloglines = verilog.readlines()
-
-    # print(veriloglines)
-
-    extractor = VerilogSpecifyExtractor(veriloglines)
-    extractor.parse()
-    for module, parsedentry in extractor.parsedspecifyblocks.items():
-        print('-------------------')
-        print('Module: {}'.format(module))
-        print('-------------------')
-        print('Specparams')
-        for param, value in parsedentry.specparams:
-            print('{} = {}'.format(param, value))
-        print('-------------------')
-        print('Constraint checks')
-        for c in parsedentry.constraintchecks:
-            print(c)
-        print('-------------------')
-        print('Path delays')
-        for p in parsedentry.pathdelays:
-            print(p)
-        print('-------------------')
-        print('Conditioned path delays')
-        for v in parsedentry.ifstatements.values():
-            for e in v:
-                print(e)
-
-    # with open(args.outputdir, 'w') as out:
-    #     out.write('\n'.join(extractor.veriloglines))
-
-    # with open(args.input, 'r') as infile:
-    #     celltolibs = json.load(infile)
-
-    # numprint = 0
-    # maxnumprint = 10
-    # for cell, veriloglist in celltolibs.items():
-    #     for verilogname in veriloglist:
-    #         with open(verilogname, 'r') as verilog:
-    #             lines = verilog.readlines()
-    #         toprint = False
-    #         for line in lines:
-    #             if line.strip() == 'specify':
-    #                 toprint = True
-    #             # if toprint:
-    #             #     print(line, end='')
-    #             if line.strip() == 'endspecify':
-    #                 toprint = False
-    #                 numprint += 1
-    #         if toprint:
-    #             print('{} {}: unfinished specify block'.format(cell, verilogname))
-    #         # if numprint >= maxnumprint:
-    #         #     break
-    #     if numprint >= maxnumprint:
-    #         break

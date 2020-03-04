@@ -74,6 +74,7 @@ class SpecifyLexer(object):
         'TILDA',
         'LPAR',
         'RPAR',
+        'STRING',
         'EVAND',
         'SETUP',
         'HOLD',
@@ -94,13 +95,14 @@ class SpecifyLexer(object):
     t_ignore = '[ \t]'
     t_PLUS = r'\+'
     t_MINUS = r'\-'
-    t_AND = r'\&'
-    t_EQ = r'=='
+    t_AND = r'\&\&?'
+    t_EQ = r'===?'
     t_EXCL = r'\!'
     t_TILDA = r'~'
     t_EQUALS = r'\='
     t_LPAR = r'\('
     t_RPAR = r'\)'
+    t_STRING = r'".*"'
     t_EVAND = r'\&\&\&'
     t_SETUP = r'\$setup'
     t_HOLD = r'\$hold'
@@ -180,6 +182,6 @@ class SpecifyLexer(object):
         while True:
             token = self.lexer.token()
             if token:
-                print(token)
+                print('{} : {}'.format(str(token), str(token.value)))
             else:
                 break

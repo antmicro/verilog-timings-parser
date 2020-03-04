@@ -71,6 +71,7 @@ class SpecifyLexer(object):
         'AND',
         'EQ',
         'EXCL',
+        'TILDA',
         'LPAR',
         'RPAR',
         'EVAND',
@@ -81,12 +82,12 @@ class SpecifyLexer(object):
         'RECOVERY',
         'PERIOD',
         'WIDTH',
+        'RECREM',
         'COMMA',
         'SEMI',
         'COLON',
         'NAME',
         'NUMBER',
-        'REAL',
         'PATHTOKEN',
         ] + list(reserved.values())
 
@@ -96,6 +97,7 @@ class SpecifyLexer(object):
     t_AND = r'\&'
     t_EQ = r'=='
     t_EXCL = r'\!'
+    t_TILDA = r'~'
     t_EQUALS = r'\='
     t_LPAR = r'\('
     t_RPAR = r'\)'
@@ -107,6 +109,7 @@ class SpecifyLexer(object):
     t_RECOVERY = r'\$recovery'
     t_PERIOD = r'\$period'
     t_WIDTH = r'\$width'
+    t_RECREM = r'\$recrem'
     t_COMMA = r','
     t_SEMI = r';'
     t_COLON = r':'
@@ -120,6 +123,7 @@ class SpecifyLexer(object):
         r'[-+]?[0-9]+\.[0-9]+'
         t.type = 'NUMBER'
         t.value = Number(32, 'f', float(t.value))
+        return t
 
     def t_NUMBER(self, t):
         r'((?P<size>[0-9]+)?\'(?P<type>[bBoOhHdD])(?P<value>[0-9a-fA-F_]+)|(?P<dvalue>[0-9]+))'

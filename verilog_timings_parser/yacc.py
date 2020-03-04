@@ -40,7 +40,8 @@ class Parser:
         ('left', 'PLUS', 'MINUS'),
         ('left', 'AND'),
         ('left', 'EQ'),
-        ('right', 'UMINUS', 'UPLUS', 'EXCL'),
+        ('left', 'PARENTHESIS'),
+        ('right', 'UMINUS', 'UPLUS', 'EXCL', 'TILDA'),
     )
 
     def __init__(self):
@@ -50,27 +51,22 @@ class Parser:
         self.pathdelays = []
         self.ifstatements = defaultdict(list)
         self.logger = yacc.PlyLogger(sys.stdout)
-        self.parser = yacc.yacc(module=self, errorlog=self.logger, debuglog=self.logger, write_tables=False)
+        # with debug
+        # self.parser = yacc.yacc(module=self, errorlog=self.logger, debuglog=self.logger, write_tables=False)
+        # without debug
+        # self.parser = yacc.yacc(module=self, errorlog=self.logger, write_tables=False)
+        self.parser = yacc.yacc(module=self)
 
     def p_specify_block(self, p):
-        '''specifyblock : SPECIFY specdecl constraintchecks pathdelays ifstatements ENDSPECIFY'''
-        # '''specify_block : SPECIFY specdecl constraintchecks pathdelays ENDSPECIFY
-        #                  | SPECIFY specdecl pathdelays ENDSPECIFY
-        #                  | SPECIFY pathdelays ENDSPECIFY
-        #                  | SPECIFY constraintchecks pathdelays ENDSPECIFY
-        #                  | SPECIFY specdecl ENDSPECIFY''' # FIXME: remove this one
-        print('PARSED file')
-        pp(self.specparams, indent=3)
-        pp(self.constraintchecks, indent=3)
-        pp(self.pathdelays, indent=3)
-        pp(self.ifstatements, indent=3)
+        '''specifyblock : SPECIFY lines ENDSPECIFY'''
+        pass
 
     # SPECPARAM block
     # ---------------
 
-    def p_specdecl_block(self, p):
-        '''specdecl : specparam
-                    | specdecl specparam'''
+    def p_lines_specdecl(self, p):
+        '''lines : specparam
+                 | lines specparam'''
         p[0] = p[1]
 
     def p_specparam_assign(self, p):
@@ -83,9 +79,9 @@ class Parser:
     # CONSTRAINTCHECK block
     # ---------------------
 
-    def p_constraintchecks_block(self, p):
-        '''constraintchecks : constraintcheck
-                            | constraintchecks constraintcheck'''
+    def p_lines_constraintchecks(self, p):
+        '''lines : constraintcheck
+                 | lines constraintcheck'''
         p[0] = p[1]
 
     def p_constraintcheck_group(self, p):
@@ -95,7 +91,8 @@ class Parser:
                            | skew
                            | recovery
                            | period
-                           | width'''
+                           | width
+                           | recrem'''
         p[0] = p[1]
 
     def p_setup_entry(self, p):
@@ -182,12 +179,25 @@ class Parser:
         }
         self.constraintchecks.append(constraint)
 
+    def p_recrem_entry(self, p):
+        '''recrem : RECREM LPAR event COMMA event COMMA delval COMMA delval COMMA NAME RPAR SEMI
+                  | RECREM LPAR event COMMA event COMMA delval COMMA delval RPAR SEMI'''
+        constraint = {
+            'type': 'recrem',
+            'reference_event': p[3],
+            'data_event': p[5],
+            'setup_limit': p[7],
+            'hold_limit': p[9],
+            'notifier': p[11] if len(p) == 13 else None
+        }
+        self.constraintchecks.append(constraint)
+
     # PATHDELAYS block
     # ----------------
 
-    def p_pathdelays_block(self, p):
-        '''pathdelays : pathdelay
-                      | pathdelays pathdelay'''
+    def p_lines_pathdelays(self, p):
+        '''lines : pathdelay
+                 | lines pathdelay'''
         p[0] = p[1]
         self.pathdelays.append(p[len(p) - 1])
 
@@ -292,9 +302,9 @@ class Parser:
         condpathdelay['cond'] = fincond
         p[0] = condpathdelay
 
-    def p_ifstatement_multiline(self, p):
-        '''ifstatements : ifstatement
-                        | ifstatements ifstatement'''
+    def p_lines_ifstatements(self, p):
+        '''lines : ifstatement
+                 | lines ifstatement'''
         p[0] = p[1]
         pif = p[len(p) - 1]
         key = self._getifkey(pif)
@@ -305,11 +315,11 @@ class Parser:
 
     def p_delval_mintypmax(self, p):
         '''delval : expression COLON expression COLON expression'''
-        p[0] = [int(p[1]), int(p[3]), int(p[5])]
+        p[0] = [float(p[1]), float(p[3]), float(p[5])]
 
     def p_delval_simple(self, p):
         '''delval : expression'''
-        val = int(p[1])
+        val = float(p[1])
         p[0] = [val, val, val]
 
     def p_delaylist_1(self, p):
@@ -329,25 +339,6 @@ class Parser:
             'X->0': p[1],
             'X->Z': p[1],
             'Z->X': p[1],
-        }
-
-    def p_delaylist_1_par(self, p):
-        '''delaylist : LPAR delval RPAR'''
-        p[0] = {
-            'rise': p[2],
-            'fall': p[2],
-
-            '0->Z': p[2],
-            'Z->1': p[2],
-            '1->Z': p[2],
-            'Z->0': p[2],
-
-            '0->X': p[2],
-            'X->1': p[2],
-            '1->X': p[2],
-            'X->0': p[2],
-            'X->Z': p[2],
-            'Z->X': p[2],
         }
 
     def p_delaylist_2(self, p):
@@ -467,7 +458,7 @@ class Parser:
             p[0] = -p[2]
 
     def p_expression_parenthesis(self, p):
-        'expression : LPAR expression RPAR'
+        'expression : LPAR expression RPAR %prec PARENTHESIS'
         p[0] = p[2]
 
     def p_expression_number(self, p):
@@ -508,14 +499,19 @@ class Parser:
         '''cond : EXCL cond'''
         p[0] = '{}{}'.format(p[1],p[2])
 
+    def p_cond_inv_tilda(self, p):
+        '''cond : TILDA cond'''
+        p[0] = '{}{}'.format(p[1],p[2])
+
     # ERROR HANDLING
     # --------------
 
     def p_error(self, p):
-        if p:
-            print('Syntax error at "{}" (line {})'.format(p.value, p.lineno))
-        else:
-            print('Syntax error at EOF')
+        # if p:
+        #     print('Syntax error at "{}" (line {})'.format(p.value, p.lineno))
+        # else:
+        #     print('Syntax error at EOF')
+        pass
 
     # PARSING SCRIPT
     # --------------

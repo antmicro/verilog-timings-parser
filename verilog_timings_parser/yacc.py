@@ -223,8 +223,9 @@ class Parser:
         self.constraintchecks.append(constraint)
 
     def p_recovery_full_entry(self, p):
-        '''recovery : RECOVERY LPAR event COMMA event COMMA delval COMMA delval COMMA optname COMMA optcond COMMA optcond COMMA optcond COMMA optcond RPAR SEMI
+        '''recrem : RECOVERY LPAR event COMMA event COMMA delval COMMA delval COMMA optname COMMA optcond COMMA optcond COMMA optcond COMMA optcond RPAR SEMI
         '''
+        # this is special case for recovery that looks exactly like recrem
         constraint = {
             'type': 'recrem',
             'reference_event': p[3],

@@ -410,7 +410,7 @@ class Parser:
                 'input_port': p[2],
                 'parallel': p[4],
                 'output_port': p[5],
-                'inverted': p[3],
+                'inverted': p[3] == '-',
                 'source': None,
                 'delaylist': p[8]
             }

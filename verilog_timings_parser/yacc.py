@@ -620,12 +620,15 @@ class Parser:
         if p[2] == '&&&':
             if type(p[1]) is list:
                 if type(p[3]) is list:
-                    p[0] = p[1].extend(p[3])
+                    p[0] = p[1]
+                    p[0].extend(p[3])
                 else:
-                    p[0] = p[1].extend([p[3]])
+                    p[0] = p[1]
+                    p[0].extend([p[3]])
             else:
                 if type(p[3]) is list:
-                    p[0] = [p[0]].extend(p[3])
+                    p[0] = [p[1]]
+                    p[0].extend(p[3])
                 else:
                     p[0] = [p[1], p[3]]
         else:

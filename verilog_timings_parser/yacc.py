@@ -663,11 +663,6 @@ class Parser:
         else:
             p[0] = self.specparams[p[1]]
 
-    def p_optexpr_optionalexpression(self, p):
-        '''optexpr : expression
-                   | empty'''
-        p[0] = p[1]
-
     # IF CONDITIONS
     # -------------
 

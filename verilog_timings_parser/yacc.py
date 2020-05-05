@@ -68,7 +68,7 @@ class Parser:
         # without debug
         # self.parser = yacc.yacc(module=self, errorlog=self.logger, write_tables=False)
         # without any more elaborated output, just errors
-        self.parser = yacc.yacc(module=self)
+        self.parser = yacc.yacc(module=self, debug=False, optimize=1)
 
     def p_specify_block(self, p):
         '''specifyblock : SPECIFY lines ENDSPECIFY'''

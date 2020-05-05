@@ -153,20 +153,6 @@ class Parser:
         self.constraintchecks.append(constraint)
 
     def p_setuphold_entry_full(self, p):
-        '''setuphold : SETUPHOLD LPAR event COMMA event COMMA delval COMMA delval COMMA NAME COMMA optcond COMMA optcond RPAR SEMI'''
-        constraint = {
-            'type': 'setuphold',
-            'reference_event': p[3],
-            'data_event': p[5],
-            'setup_limit': p[7],
-            'hold_limit': p[9],
-            'notifier': p[11],
-            'tstamp_cond': p[13],
-            'tcheck_cond': p[15],
-        }
-        self.constraintchecks.append(constraint)
-
-    def p_setuphold_entry_full(self, p):
         '''setuphold : SETUPHOLD LPAR event COMMA event COMMA delval COMMA delval COMMA NAME COMMA optcond COMMA optcond COMMA optcond COMMA optcond RPAR SEMI'''
         constraint = {
             'type': 'setuphold',

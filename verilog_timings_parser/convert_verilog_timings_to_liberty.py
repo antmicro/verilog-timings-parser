@@ -1,6 +1,6 @@
 import argparse
 from pathlib import Path
-import .extract_timings
+from . import extract_timings
 from pprint import pprint as pp
 from quicklogic_timings_importer import json_to_liberty
 
@@ -175,7 +175,7 @@ def convert_specify_to_libertyjson(libraryname, parsedentry):
     else:
         return None
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "input",
@@ -236,3 +236,6 @@ if __name__ == '__main__':
             print('No timings data in specify block')
     else:
         print('No specify block')
+
+if __name__ == '__main__':
+    main()

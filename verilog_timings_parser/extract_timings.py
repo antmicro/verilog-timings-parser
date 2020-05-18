@@ -50,7 +50,7 @@ class VerilogSpecifyExtractor(object):
         # XXX: assumption here that the crucial information of ifdef is stored in else part
         # XXX: except for SC_USE_PG_PIN
         ifdef = False
-        remodule = re.compile(r'^\s*module\s*(?P<name>[a-zA-Z_][a-zA-Z0-9_\$]+)')
+        remodule = re.compile(r'^\s*module\s*(?P<name>[a-zA-Z_][a-zA-Z0-9_\$]*)')
         respecify = re.compile(r'^\s*specify')
         reendspecify = re.compile(r'^\s*endspecify')
         for num, line in enumerate(self.veriloglines):

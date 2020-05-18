@@ -32,7 +32,7 @@ class Number(object):
 
 
 class SpecifyLexer(object):
-   
+
     class InvalidNumberException(Exception):
         def __init__(self, line, value):
             self.message = 'Invalid number {} at line {}'.format(value, line)
@@ -53,7 +53,7 @@ class SpecifyLexer(object):
         self.logger = lex.PlyLogger(sys.stdout)
         self.lexer = lex.lex(module=self, errorlog=self.logger)
         self.input_data = ''
-   
+
     reserved = {
         'specify': 'SPECIFY',
         'endspecify': 'ENDSPECIFY',

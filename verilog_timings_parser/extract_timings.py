@@ -8,7 +8,7 @@ from .yacc import Parser
 
 class SpecifyParserError(Exception):
     def __init__(self, lineno, line):
-        self.message = 'Error at line {}: {}'.format(lineno, line + 1)
+        self.message = 'Error at line {}: {}'.format(lineno, line)
 
     def __str__(self):
         if self.message:

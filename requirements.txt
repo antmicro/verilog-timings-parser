@@ -1,0 +1,2 @@
+quicklogic_timings_importer==0.0.1
+ply==3.11

@@ -1,6 +1,5 @@
 import ply.yacc as yacc
 import sys
-from pprint import pprint as pp
 
 from .lex import SpecifyLexer
 from collections import defaultdict
@@ -11,7 +10,7 @@ class Parser:
     class SpecparamRedefinitionError(Exception):
         def __init__(self, line, specparamname):
             self.message = 'Specparam redefinition "{}" at line {}'.format(
-                    specparamname, line)
+                specparamname, line)
 
         def __str__(self):
             if self.message:
@@ -20,7 +19,7 @@ class Parser:
     class SpecparamNotDeclared(Exception):
         def __init__(self, line, specparamname):
             self.message = 'Specparam "{}" at line {} is not declared'.format(
-                    specparamname, line)
+                specparamname, line)
 
         def __str__(self):
             if self.message:
@@ -28,7 +27,7 @@ class Parser:
 
     class IfnoneError(Exception):
         def __init__(self, line):
-            self.message = 'Ifnone at line {} is corresponding to nonexistent delay path'.format(line)
+            self.message = 'Ifnone at line {} is corresponding to nonexistent delay path'.format(line)  # noqa: E501
 
         def __str__(self):
             if self.message:
@@ -37,14 +36,15 @@ class Parser:
     class SyntaxError(Exception):
         def __init__(self, p):
             if p:
-                self.message = 'Syntax error at "{}" (line {})'.format(p, p.lineno)
+                self.message = 'Syntax error at "{}" (line {})'.format(
+                    p,
+                    p.lineno)
             else:
                 self.message = 'Syntax error at EOF'
 
         def __str__(self):
             if self.message:
                 return self.message
-
 
     tokens = SpecifyLexer.tokens
 
@@ -63,12 +63,11 @@ class Parser:
         self.pathdelays = []
         self.ifstatements = defaultdict(list)
         self.logger = yacc.PlyLogger(sys.stdout)
-        # with debug
-        # self.parser = yacc.yacc(module=self, errorlog=self.logger, debuglog=self.logger, write_tables=False)
-        # without debug
-        # self.parser = yacc.yacc(module=self, errorlog=self.logger, write_tables=False)
-        # without any more elaborated output, just errors
-        self.parser = yacc.yacc(module=self, debug=False, optimize=1, write_tables=False)
+        self.parser = yacc.yacc(
+            module=self,
+            debug=False,
+            optimize=1,
+            write_tables=False)
 
     def p_specify_block(self, p):
         '''specifyblock : SPECIFY lines ENDSPECIFY'''
@@ -655,7 +654,7 @@ class Parser:
 
     def p_expression_name(self, p):
         'expression : NAME'
-        if not p[1] in  self.specparams:
+        if not p[1] in self.specparams:
             if p[1] == 'DELAY':
                 p[0] = 0
             else:
@@ -680,19 +679,19 @@ class Parser:
     def p_cond_and(self, p):
         '''cond : cond AND cond
                 | cond EQ cond'''
-        p[0] = '{}{}{}'.format(p[1],p[2],p[3])
+        p[0] = '{}{}{}'.format(p[1], p[2], p[3])
 
     def p_cond_par(self, p):
         '''cond : LPAR cond RPAR %prec PARENTHESIS'''
-        p[0] = '{}{}{}'.format(p[1],p[2],p[3])
+        p[0] = '{}{}{}'.format(p[1], p[2], p[3])
 
     def p_cond_inv(self, p):
         '''cond : EXCL cond'''
-        p[0] = '{}{}'.format(p[1],p[2])
+        p[0] = '{}{}'.format(p[1], p[2])
 
     def p_cond_inv_tilda(self, p):
         '''cond : TILDA cond'''
-        p[0] = '{}{}'.format(p[1],p[2])
+        p[0] = '{}{}'.format(p[1], p[2])
 
     def p_optcond_optionalcond(self, p):
         '''optcond : cond

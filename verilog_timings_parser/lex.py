@@ -1,5 +1,4 @@
 import ply.lex as lex
-from ply.lex import TOKEN
 import re
 import sys
 
@@ -13,7 +12,10 @@ class Number(object):
     def __str__(self):
         if (self.size == 32 and self.typ == 'd') or self.typ == 'f':
             return str(self.value)
-        return "{}'{}{}".format(self.size, self.typ, format(self.value, self.typ if self.typ != 'h' else 'x'))
+        return "{}'{}{}".format(
+            self.size,
+            self.typ,
+            format(self.value, self.typ if self.typ != 'h' else 'x'))
 
     def __add__(self, other):
         return Number(self.size, self.typ, self.value + other.value)
@@ -90,7 +92,7 @@ class SpecifyLexer(object):
         'NAME',
         'NUMBER',
         'PATHTOKEN',
-        ] + list(reserved.values())
+    ] + list(reserved.values())
 
     t_ignore = '[ \t]'
     t_PLUS = r'\+'
@@ -128,21 +130,20 @@ class SpecifyLexer(object):
         return t
 
     def t_NUMBER(self, t):
-        r'((?P<size>[0-9]+)?\'(?P<type>[bBoOhHdD])(?P<value>[0-9a-fA-F_]+)|(?P<dvalue>[0-9]+))'
+        r'((?P<size>[0-9]+)?\'(?P<type>[bBoOhHdD])(?P<value>[0-9a-fA-F_]+)|(?P<dvalue>[0-9]+))'  # noqa: E501
         match = t.lexer.lexmatch
         size = 32
         typ = 'd'
         value = (match.group('dvalue') if match.group('dvalue')
-                else match.group('value').lower())
+                 else match.group('value').lower())
         value = value.replace('_', '')
         digsize = {2: 1, 8: 3, 16: 4, 10: 4}
 
         def convert_value(regex, base):
-            if (not re.match(regex, value) or
-                    len(value) * digsize[base] > size):
+            if (not re.match(regex, value) or len(value) * digsize[base] > size):
                 raise SpecifyLexer.InvalidNumberException(
-                        t.lexer.lineno,
-                        t.value)
+                    t.lexer.lineno,
+                    t.value)
             return int(value, base)
 
         if match.group('size'):
@@ -173,9 +174,9 @@ class SpecifyLexer(object):
 
     def t_error(self, t):
         raise SpecifyLexer.TokenizeError(
-                'Illegal character {} at line {}'.format(
-                    t.value[0],
-                    t.lexer.lineno))
+            'Illegal character {} at line {}'.format(
+                t.value[0],
+                t.lexer.lineno))
 
     def test(self, data):
         self.lexer.input(data)

@@ -16,9 +16,9 @@ def convert_specify_to_libertyjson(libraryname, parsedentry):
             allpaths.extend(paths)
         for pathdelay in allpaths:
             pinname = 'pin {}'.format(pathdelay['output_port'])
-            if not pinname in librarycontent[cell]:
+            if pinname not in librarycontent[cell]:
                 librarycontent[cell][pinname] = {}
-            if not 'timing ' in librarycontent[cell][pinname]:
+            if 'timing ' not in librarycontent[cell][pinname]:
                 librarycontent[cell][pinname]['timing '] = []
             timing = {}
             timing['related_pin'] = pathdelay['input_port']
@@ -62,9 +62,9 @@ def convert_specify_to_libertyjson(libraryname, parsedentry):
         for constraintcheck in entry['constraintchecks']:
             if constraintcheck['type'] in ['setup', 'hold', 'skew', 'recovery']:
                 pinname = 'pin {}'.format(constraintcheck['data_event']['signals'][0])
-                if not pinname in librarycontent[cell]:
+                if pinname not in librarycontent[cell]:
                     librarycontent[cell][pinname] = {}
-                if not 'timing ' in librarycontent[cell][pinname]:
+                if 'timing ' not in librarycontent[cell][pinname]:
                     librarycontent[cell][pinname]['timing '] = []
                 timing = {}
                 if constraintcheck['data_event']['edge'] == 'posedge':
@@ -89,9 +89,9 @@ def convert_specify_to_libertyjson(libraryname, parsedentry):
                 librarycontent[cell][pinname]['timing '].append(timing)
             elif constraintcheck['type'] in ['setuphold', 'recrem']:
                 pinname = 'pin {}'.format(constraintcheck['data_event']['signals'][0])
-                if not pinname in librarycontent[cell]:
+                if pinname not in librarycontent[cell]:
                     librarycontent[cell][pinname] = {}
-                if not 'timing ' in librarycontent[cell]:
+                if 'timing ' not in librarycontent[cell]:
                     librarycontent[cell][pinname]['timing '] = []
                 timing = {}
                 timing['related_pin'] = constraintcheck['reference_event']['signals'][0]
@@ -115,7 +115,7 @@ def convert_specify_to_libertyjson(libraryname, parsedentry):
                     timing['when'] = cond
                 timing['timing_type'] = '{}_{}'.format(
                         'setup' if constraintcheck['type'] == 'setuphold' else 'recovery',
-                        'rising' if constraintcheck['reference_event']['edge'] == 'posedge' else 'falling')
+                        'rising' if constraintcheck['reference_event']['edge'] == 'posedge' else 'falling')  # noqa: E501
                 librarycontent[cell][pinname]['timing '].append(timing)
 
                 timing = {}
@@ -139,14 +139,14 @@ def convert_specify_to_libertyjson(libraryname, parsedentry):
                     cond = '&'.join(constraintcheck['data_event']['signals'][1:])
                     timing['when'] = cond
                 timing['timing_type'] = '{}_{}'.format(
-                        'hold' if constraintcheck['type'] == 'setuphold' else 'removal',
-                        'rising' if constraintcheck['reference_event']['edge'] == 'posedge' else 'falling')
+                    'hold' if constraintcheck['type'] == 'setuphold' else 'removal',
+                    'rising' if constraintcheck['reference_event']['edge'] == 'posedge' else 'falling')
                 librarycontent[cell][pinname]['timing '].append(timing)
             elif constraintcheck['type'] == 'period':
                 pinname = 'pin {}'.format(constraintcheck['reference_event']['signals'][0])
-                if not pinname in librarycontent[cell]:
+                if pinname not in librarycontent[cell]:
                     librarycontent[cell][pinname] = {}
-                if not 'minimum_period ' in librarycontent[cell]:
+                if 'minimum_period ' not in librarycontent[cell]:
                     librarycontent[cell][pinname]['minimum_period '] = []
                 period = {}
 
@@ -161,7 +161,7 @@ def convert_specify_to_libertyjson(libraryname, parsedentry):
                 librarycontent[cell][pinname]['minimum_period '].append(period)
             else:
                 pinname = 'pin {}'.format(constraintcheck['reference_event']['signals'][0])
-                if not pinname in librarycontent[cell]:
+                if pinname not in librarycontent[cell]:
                     librarycontent[cell][pinname] = {}
                 limit = 'width_limit'
                 librarycontent[cell][pinname]['min_pulse_width_low'] = constraintcheck[limit][0]
@@ -174,6 +174,7 @@ def convert_specify_to_libertyjson(libraryname, parsedentry):
         return library
     else:
         return None
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -236,6 +237,7 @@ def main():
             print('No timings data in specify block')
     else:
         print('No specify block')
+
 
 if __name__ == '__main__':
     main()

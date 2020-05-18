@@ -14,8 +14,8 @@ setuptools.setup(
     entry_points={
         'console_scripts': ['verilog-timings-to-liberty=verilog_timings_parser.convert_verilog_timings_to_liberty:main']  # noqa: E501
     },
-    install_requires = [
-        'quicklogic_timings_importer @ git+https://github.com/antmicro/quicklogic-timings-importer#egg=quicklogic_timings_importer',
+    install_requires=[
+        'quicklogic_timings_importer @ git+https://github.com/antmicro/quicklogic-timings-importer#egg=quicklogic_timings_importer',  # noqa: E501
         'ply',
     ],
     classifiers=[

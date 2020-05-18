@@ -1,10 +1,8 @@
-import json
-import argparse
-from pathlib import Path
 import re
 from collections import defaultdict
 
 from .yacc import Parser
+
 
 class SpecifyParserError(Exception):
     def __init__(self, lineno, line):
@@ -13,6 +11,7 @@ class SpecifyParserError(Exception):
     def __str__(self):
         if self.message:
             return self.message
+
 
 class VerilogSpecifyExtractor(object):
     def __init__(self, veriloglines):
@@ -73,7 +72,7 @@ class VerilogSpecifyExtractor(object):
                 isspecify = 2
                 specifyblocks[modulename].append(line)
             elif '`ifdef' in line:
-                if not 'SC_USE_PG_PIN' in line:
+                if 'SC_USE_PG_PIN' not in line:
                     ifdef = True
             elif '`ifndef' in line:
                 pass
@@ -105,7 +104,7 @@ class VerilogSpecifyExtractor(object):
                 print('Module: {}'.format(module))
                 print('---------------')
                 for i, line in enumerate(specifyblock):
-                    print('{:06d}: {}'.format(i+1, line))
+                    print('{:06d}: {}'.format(i + 1, line))
                 print('---------------')
                 print(ex)
                 print('---------------')

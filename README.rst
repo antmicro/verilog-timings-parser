@@ -1,6 +1,8 @@
 Verilog timings parser - a tool for extracting timing data from Verilog files
 =============================================================================
 
+Copyright (c) 2020-2021 `Antmicro <https://www.antmicro.com>`_
+
 This is a tool for extracting data from Verilog's `specify` blocks and saving them to other timing formats (Liberty, SDF).
 
 Installation
